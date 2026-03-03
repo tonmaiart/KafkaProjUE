@@ -11,7 +11,8 @@ class UKORETOOLKIT_API UUkoreToolkitSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	//UCustomPluginSettings();
+	UUkoreToolkitSettings();
+
 	UPROPERTY(Config, DisplayName = "All Naming Types", EditAnywhere, Category = "Asset Manager")
 	TMap<FString, FString> namingTypes;
 

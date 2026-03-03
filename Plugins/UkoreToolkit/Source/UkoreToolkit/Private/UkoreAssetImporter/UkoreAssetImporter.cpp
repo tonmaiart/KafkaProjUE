@@ -457,9 +457,9 @@ namespace AssetImporterUtility{
 				// Add to Array
 				ShotDataListResult.Add(CurrentShotData);
 
-				// Debugig
+				// Debugging
 				if (false) {
-					UE_LOG(LogTemp, Log, TEXT("# Shot File Found : %s"), *ShotFile);
+					UE_LOG(LogTemp, Log, TEXT("# Load Shot File : %s"), *ShotFile);
 					UE_LOG(LogTemp, Log, TEXT("- Base Path : %s , Full Path : %s , ShortenPath : %s"), *BasePath, *ShotFile, *ShortenPath);
 					UE_LOG(LogTemp, Log, TEXT("- Current Import Path : %s"), *CurrentImportPath);
 					UE_LOG(LogTemp, Log, TEXT("- Content Browser Asset Path : %s"), *ContentAssetFilePath);

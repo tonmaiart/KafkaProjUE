@@ -442,23 +442,35 @@ TArray<TSharedPtr<FShotData>> SUkoreAssetImporterWidgetTab::GetSelectedItemListV
 }
 void SUkoreAssetImporterWidgetTab::OnImportSelectedItemClicked()
 {
+
+	UE_LOG(LogTemp, Log, TEXT("# Inport Selected Item #"));
+
 	// Get Selected Items
 	TArray<TSharedPtr<FShotData>> SelectedItems = SUkoreAssetImporterWidgetTab::GetSelectedItemListView();
+
+	if (SelectedItems.IsEmpty())
+	{
+		UE_LOG(LogTemp, Log, TEXT("- Not found any Selected Item to Import"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("# Selected Items Count : %d"), SelectedItems.Num());
 
 	for (TSharedPtr<FShotData> item : SelectedItems)
 	{
 		FString& ImportPath = item->LastestFilePath;
 		FString& DestinationDirPath = item->ContentAssetDirPath;
 
-		UE_LOG(LogTemp, Log, TEXT("# Checking File Path : "), *ImportPath);
+		UE_LOG(LogTemp, Log, TEXT("- Shot Name : %s"), *item->ShotName);
+		UE_LOG(LogTemp, Log, TEXT("- Checking Lastest File Path to import : %s"), *ImportPath);
+		UE_LOG(LogTemp, Log, TEXT("- File Load Staus : %s"), *FString(UEnum::GetValueAsString(item->AssetStatus)));
 
 		// Check Asset Existising in Content Browser
-		if (item->AssetStatus == EAssetStatus::Loaded || item->AssetStatus == EAssetStatus::UpToDate)
+		if (item->AssetStatus == EAssetStatus::Unloaded)
 		{
 			UE_LOG(LogTemp, Log, TEXT("# Importing Asset : "), *ImportPath);
-
 		}
-		else
+		else if (item->AssetStatus == EAssetStatus::Loaded || item->AssetStatus == EAssetStatus::UpToDate)
 		{
 			UE_LOG(LogTemp, Log, TEXT("# Skip Because this asset already imported : "), *ImportPath);
 			continue;

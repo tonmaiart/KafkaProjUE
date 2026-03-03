@@ -6,10 +6,13 @@
 #include "AssetToolsModule.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "IAssetTools.h"
+#include "AssetImportTask.h"
 
 #include "GeometryCache.h"
 #include "AlembicImportFactory.h"
 #include "AbcImportSettings.h"
+//#include "AbcImporter.h"
+
 #include "CoreMinimal.h"
 
 #include "EditorAssetLibrary.h"
@@ -140,7 +143,10 @@ namespace Utility
 
 	static UGeometryCache* ImportAlembicFile(FString SourceFilePath, FString DestinationPath)
 	{
+		UE_LOG(LogTemp, Log, TEXT("# Import Alembic File %s to %s #"),*SourceFilePath,*DestinationPath);
+
 		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+
 
 		// Create AbcFactory
 		UAlembicImportFactory* AbcFactory = NewObject<UAlembicImportFactory>();
@@ -148,24 +154,59 @@ namespace Utility
 		//Setting Import Configuration
 		AbcFactory->ImportSettings->ImportType = EAlembicImportType::GeometryCache;
 		AbcFactory->ImportSettings->GeometryCacheSettings.bFlattenTracks = true;
+		AbcFactory->bShowOption = true;
+		AbcFactory->ImportSettings->SamplingSettings.FrameStart = 1001;
 
-		//Close Ui (Slient Import)
-		AbcFactory->bEditAfterNew = false;
-		AbcFactory->bShowOption = false;
+		AbcFactory->AddToRoot();
 
-		// Import Automate
-		TArray<FString> FileNames;
-		FileNames.Add(SourceFilePath);
+		// Get Meta Data for set start/end frame
+		//FAbcImporter AbcImporter;
+		//EAbcImportError OpenResult = AbcImporter.OpenAbcFileForImport(SourceFilePath);
 
+		//if (OpenResult == EAbcImportError::AbcImportError_NoError)
+		//{
+		//	AbcFactory->ImportSettings->SamplingSettings.FrameStart = AbcImporter.GetStartFrameIndex();
+		//	AbcFactory->ImportSettings->SamplingSettings.FrameEnd = AbcImporter.GetEndFrameIndex();
+		//}
+
+		// Create Import Data
 		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
 		ImportData->Filenames.Add(SourceFilePath);
 		ImportData->DestinationPath = DestinationPath;
 
-		TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		// Import Asset With Dialog
+		UAssetImportTask* ImportTask = NewObject<UAssetImportTask>();
+		ImportTask->Filename = SourceFilePath;
+		ImportTask->DestinationPath = DestinationPath;
+		ImportTask->bAutomated = false;
+		ImportTask->bSave = false;
+		ImportTask->Options = AbcFactory;
 
-		for (UObject* asset : ImportedAssets) {
-			UEditorAssetLibrary::SaveAsset(asset->GetPathName(), false);
-		}
+		TArray<UAssetImportTask*> ImportTasks;
+		ImportTasks.Add(ImportTask);
+
+		TArray<FString> ImportPaths;
+		ImportPaths.Add(SourceFilePath);
+		
+
+		// Start Import With dialog
+		AssetToolsModule.Get().ImportAssetTasks(ImportTasks);
+
+		// Check Is Import Complete
+		//if (ImportedAssets.Num() == 0)
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("Import Dialog was canceled"));
+		//}
+		//else
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("Import Dialog Complete!"));
+
+		//	// Save File
+		//	for (UObject* asset : ImportedAssets) {
+		//		UEditorAssetLibrary::SaveAsset(asset->GetPathName(), false);
+		//	}
+
+		//}
 
 
 		return nullptr;
@@ -411,10 +452,14 @@ namespace DebugHeader
 
 	static void Print(const FString& Message, const FColor& Color = FColor::White)
 	{
-		if (GEngine)
+		if (false)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, Color, Message);
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 10.f, Color, Message);
+			}
 		}
+
 	}
 
 	static void PrintLog(const FString& Message)

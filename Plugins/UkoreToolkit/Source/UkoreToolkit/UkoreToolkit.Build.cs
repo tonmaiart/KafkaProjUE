@@ -45,7 +45,10 @@ public class UkoreToolkit : ModuleRules
                 "ToolMenus",
                 "MovieScene",
                 "GeometryCache",
-                "GeometryCacheTracks"
+                "GeometryCacheTracks",
+                "AlembicImporter",
+
+                //"AlembicLibrary"
 
 				// ... add other public dependencies that you statically link with here ...
 			}
